@@ -1,24 +1,53 @@
 - name: Python tasks
   tags: python
+  become: true
   block:
   - name: Install required system packages
-    become: true
     apt:
       name: ['ca-certificates', 'curl']
 
   - name: Install python system packages
-    become: true
     apt:
       name: ['python3-dev', 'python3-distutils']
   
   - name: Add deadsnakes repository
-    become: true
     apt_repository:
       repo: ppa:deadsnakes/ppa
       state: present
       update_cache: true
   
   - name: Install python versions
-    become: true
     apt:
       name: ['python3.8-dev', 'python3.8-distutils', 'python3.9-dev', 'python3.9-distutils', 'python3.11-dev', 'python3.11-distutils']
+
+- name: Setup virtualenv for global dependencies
+  tags: python
+  vars:
+    zip_app_location: /tmp/virtualenv.pyz
+    venv_location: "{{ lookup('env', 'HOME') }}/opt/venv"
+    python_packages: ['black', 'pre-commit', 'tox', 'twine', 'virtualenv']
+  block:
+  - name: Curl virtualenv zipapp
+    get_url:
+      url: https://bootstrap.pypa.io/virtualenv.pyz
+      dest: "{{ zip_app_location }}"
+  
+  - name: Create virtualenv
+    shell: python3.9 {{ zip_app_location }} {{ venv_location }}
+
+  - name: Install python packages
+    pip:
+      name: "{{ python_packages }}"
+      virtualenv: "{{ venv_location }}"
+
+  - name: Symlink python packages
+    file:
+      src: "{{ venv_location }}/bin/{{ item }}"
+      dest: "{{ lookup('env', 'HOME') }}/bin/{{ item }}"
+      state: link
+    loop: "{{ python_packages }}"
+
+  - name: Cleanup zipapp
+    file:
+      path: "{{ zip_app_location }}"
+      state: absent

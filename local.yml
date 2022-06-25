@@ -11,3 +11,4 @@
         - core
   tasks:
     - import_tasks: tasks/docker.yml
+    - import_tasks: tasks/python.yml 

@@ -1,0 +1,11 @@
+- name: Utilities
+  tags: core
+  become: true
+  apt:
+    name: ['curl', 'neofetch', 'ninja-build', 'fd-find', 'ripgrep', 'sqlite3', 'tmux', 'tree', 'xclip']
+
+- name: Symlink fdfind to fd
+  file:
+    src: "/usr/bin/fdfind"
+    dest: "{{ lookup('env', 'HOME') }}/bin/fd"
+    state: link

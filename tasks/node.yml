@@ -1,46 +1,46 @@
 - name: Node tasks
   tags: node
   vars:
-    global_location: "{{ lookup('env', 'HOME') }}/.local/.npm-global" 
+    global_location: "{{ lookup('env', 'HOME') }}/.local/.npm-global"
   block:
-  - name: Install nodejs and npm
-    become: true
-    apt:
-      name: ["nodejs", "npm"]
+    - name: Install nodejs and npm
+      become: true
+      apt:
+        name: ["nodejs", "npm"]
 
-  - name: Create directory for global npm and yarn packages
-    file:
-      path: "{{ global_location }}"
-      state: directory
-      mode: '0755'
+    - name: Create directory for global npm and yarn packages
+      file:
+        path: "{{ global_location }}"
+        state: directory
+        mode: '0755'
 
-  - name: Set npm to use directory
-    shell: "npm config set prefix {{ global_location }}"
+    - name: Set npm to use directory  # noqa no-changed-when
+      shell: "npm config set prefix {{ global_location }}"
 
-  - name: Install N
-    npm:
-      name: n
-      global: yes
+    - name: Install N
+      npm:
+        name: n
+        global: true
 
-  - name: Install correct version of Node
-    become: true
-    shell: "{{ global_location }}/bin/n 16"
+    - name: Install correct version of Node  # noqa no-changed-when
+      become: true
+      shell: "{{ global_location }}/bin/n 16"
 
-  - name: Enable corepack (installs yarn)
-    become: true
-    shell: "corepack enable"
+    - name: Enable corepack (installs yarn)  # noqa no-changed-when
+      become: true
+      shell: "corepack enable"
 
-  # TODO: this only sets the symlinks to this directory - the actual packages are installed to ~/.config/yarn/global
-  - name: Set yarn to use directory
-    shell: "yarn config set prefix {{ global_location }}"
+    # TODO: this only sets the symlinks to this directory - the actual packages are installed to ~/.config/yarn/global
+    - name: Set yarn to use directory  # noqa no-changed-when
+      shell: "yarn config set prefix {{ global_location }}"
 
-  - name: Install node packages
-    npm:
-      name: "{{ item }}"
-      global: yes
-    loop:
-      - eslint
-      - neovim
-      - ts-node
-      - typescript
-      - typescript-language-server
+    - name: Install node packages
+      npm:
+        name: "{{ item }}"
+        global: true
+      loop:
+        - eslint
+        - neovim
+        - ts-node
+        - typescript
+        - typescript-language-server

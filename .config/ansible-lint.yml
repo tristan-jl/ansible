@@ -1,0 +1,5 @@
+exclude_paths:
+  - .pre-commit-config.yaml
+skip_list:
+  - fqcn-builtins
+  - command-instead-of-shell

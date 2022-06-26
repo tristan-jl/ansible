@@ -5,20 +5,20 @@
     become: true
     apt:
       name: ['ca-certificates', 'curl', 'gnupg', 'lsb-release']
-  
+
   - name: Add docker GPG apt key
     become: true
     apt_key:
       url: https://download.docker.com/linux/ubuntu/gpg
       state: present
-  
+
   - name: Add docker repository
     become: true
     apt_repository:
       repo: deb https://download.docker.com/linux/ubuntu jammy stable
       state: present
       update_cache: true
-  
+
   - name: Install docker engine
     become: true
     apt:

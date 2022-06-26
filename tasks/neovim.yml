@@ -4,29 +4,32 @@
   vars:
     neovim_location: "{{ lookup('env', 'HOME') }}/opt/neovim"
   block:
-  - name: Get packer
-    git:
-      repo: https://github.com/wbthomason/packer.nvim
-      dest: "{{ lookup('env', 'HOME') }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+    - name: Get packer
+      git:
+        repo: https://github.com/wbthomason/packer.nvim
+        dest: "{{ lookup('env', 'HOME') }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
+        version: master
 
-  - name: Clone neovim
-    git:
-      repo: https://github.com/neovim/neovim.git
-      dest: "{{ neovim_location }}"
-    register: gitclone
+    - name: Clone neovim
+      git:
+        repo: https://github.com/neovim/neovim.git
+        dest: "{{ neovim_location }}"
+        force: true
+        version: v0.7.2
+      register: gitclone
 
-  - name: Build neovim
-    shell:
-      chdir: "{{ neovim_location }}"
-      cmd: "make CMAKE_BUILD_TYPE=Release"
-    when: gitclone.changed
+    - name: Build neovim
+      shell:
+        chdir: "{{ neovim_location }}"
+        cmd: "make CMAKE_BUILD_TYPE=Release"
+      when: gitclone.changed
 
-  - name: Install neovim
-    become: true
-    shell:
-      chdir: "{{ neovim_location }}"
-      cmd: "make install"
-    when: gitclone.changed
+    - name: Install neovim
+      become: true
+      shell:
+        chdir: "{{ neovim_location }}"
+        cmd: "make install"
+      when: gitclone.changed
 
-  - name: Bootstrap packer
-    shell: "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
+    - name: Bootstrap packer  # noqa no-changed-when
+      shell: "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"

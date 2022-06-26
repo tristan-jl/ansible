@@ -40,6 +40,12 @@
       name: "{{ python_packages }}"
       virtualenv: "{{ venv_location }}"
 
+  - name: Install pynvim (not symlinked)
+    tags: neovim
+    pip:
+      name: pynvim
+      virtualenv: "{{ lookup('env', 'HOME') }}/opt/venv"
+
   - name: Symlink python packages
     file:
       src: "{{ venv_location }}/bin/{{ item }}"

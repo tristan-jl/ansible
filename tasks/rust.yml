@@ -1,0 +1,86 @@
+- name: Rust tasks
+  tags: rust
+  vars:
+    rust_analyser_location: "{{ lookup('env', 'HOME') }}/opt/rust-analyzer"
+  block:
+    - name: Curl rustup script
+      get_url:
+        url: https://sh.rustup.rs
+        dest: /tmp/install_rustup.sh
+
+    - name: Install rustup
+      shell:
+        cmd: sh install_rustup.sh --no-modify-path -y
+        chdir: /tmp/
+
+    - name: Clone rust analyser
+      git:
+        repo: https://github.com/rust-analyzer/rust-analyzer.git
+        dest: "{{ rust_analyser_location }}"
+        force: true
+      register: gitclone
+
+    - name: Install rust analyser
+      shell:
+        chdir: "{{ rust_analyser_location }}"
+        cmd: cargo xtask install --server
+
+- name: Install alacritty
+  tags:
+    - rust
+    - alacritty
+  vars:
+    alacritty_location: "{{ lookup('env', 'HOME') }}/opt/alacritty"
+  block:
+    - name: Install required libraries
+      become: true
+      apt:
+        name: ['cmake', 'pkg-config', 'libfreetype6-dev', 'libfontconfig1-dev', 'libxcb-xfixes0-dev', 'libxkbcommon-dev', 'python3']
+
+    - name: Clone alacritty
+      git:
+        repo: https://github.com/alacritty/alacritty.git
+        dest: "{{ alacritty_location }}"
+      register: gitclone
+
+    - name: Install alacritty
+      shell:
+        cmd: cargo build --release
+        chdir: "{{ alacritty_location }}"
+      when: gitclone.changed
+
+    - name: Install terminfo
+      shell:
+        cmd: sudo tic -xe alacritty,alacritty-direct extra/alacritty.info
+        chdir: "{{ alacritty_location }}"
+      when: gitclone.changed
+
+    - name: Symlink build
+      file:
+        src: "{{ alacritty_location }}/target/release/alacritty"
+        dest: "{{ lookup('env', 'HOME') }}/bin/alacritty"
+        state: link
+
+    - name: Symlink icon
+      become: true
+      file:
+        src: "{{ alacritty_location }}/extra/logo/alacritty-term.svg"
+        dest: /usr/share/pixmaps/Alacritty.svg
+        state: link
+
+    - name: Install to desktop
+      become: true
+      shell:
+        cmd: |
+          desktop-file-install extra/linux/Alacritty.desktop
+          update-desktop-database
+        chdir: "{{ alacritty_location }}"
+
+    - name: Install man page
+      become: true
+      shell:
+        cmd: |
+          mkdir -p /usr/local/share/man/man1
+          gzip -c extra/alacritty.man | sudo tee /usr/local/share/man/man1/alacritty.1.gz > /dev/null
+          gzip -c extra/alacritty-msg.man | sudo tee /usr/local/share/man/man1/alacritty-msg.1.gz > /dev/null
+        chdir: "{{ alacritty_location }}"

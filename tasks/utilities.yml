@@ -2,7 +2,7 @@
   tags: core
   become: true
   apt:
-    name: ['clangd-14', 'curl', 'neofetch', 'ninja-build', 'fd-find', 'ripgrep', 'sqlite3', 'tmux', 'tree', 'xclip']
+    name: ['clangd-14', 'curl', 'neofetch', 'ninja-build', 'fd-find', 'fonts-powerline', 'ripgrep', 'sqlite3', 'stow', 'tmux', 'tree', 'xclip']
 
 - name: Symlink fdfind to fd
   file:

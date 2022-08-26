@@ -11,6 +11,7 @@
         - core
   tasks:
     - import_tasks: tasks/docker.yml
+    - import_tasks: tasks/go.yml
     - import_tasks: tasks/neovim.yml
     - import_tasks: tasks/node.yml
     - import_tasks: tasks/python.yml

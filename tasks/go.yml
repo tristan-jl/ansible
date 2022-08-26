@@ -15,3 +15,6 @@
         src: https://go.dev/dl/go1.19.linux-amd64.tar.gz
         dest: "{{ go_location }}"
         remote_src: true
+
+    - name: Install gopls
+      shell: "GOBIN=${HOME}/bin go install golang.org/x/tools/gopls@latest"

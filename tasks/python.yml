@@ -25,7 +25,7 @@
   vars:
     zip_app_location: /tmp/virtualenv.pyz
     venv_location: "{{ lookup('env', 'HOME') }}/opt/venv"
-    python_packages: ['black', 'pre-commit', 'tox', 'twine', 'virtualenv']
+    python_packages: ['black', 'pre-commit', 'jedi-language-server', 'tox', 'twine', 'virtualenv']
   block:
     - name: Curl virtualenv zipapp  # noqa risky-file-permissions
       get_url:

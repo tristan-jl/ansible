@@ -39,6 +39,7 @@
         "ansible",
         "black",
         "pre-commit",
+        "proselint",
         "pyright",
         "reorder-python-imports",
         "tox",

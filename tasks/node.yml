@@ -1,7 +1,7 @@
 - name: Node tasks
   tags: node
   vars:
-    global_location: "{{ lookup('env', 'HOME') }}/.local/.npm-global"
+    global_location: "{{ lookup('env', 'HOME') }}/.npm-global"
   block:
     - name: Install nodejs and npm
       become: true
@@ -12,9 +12,9 @@
       file:
         path: "{{ global_location }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
 
-    - name: Set npm to use directory  # noqa no-changed-when
+    - name: Set npm to use directory # noqa no-changed-when
       shell: "npm config set prefix {{ global_location }}"
 
     - name: Install N
@@ -22,25 +22,20 @@
         name: n
         global: true
 
-    - name: Install correct version of Node  # noqa no-changed-when
+    - name: Install correct version of Node # noqa no-changed-when
       become: true
-      shell: "{{ global_location }}/bin/n 16"
-
-    - name: Enable corepack (installs yarn)  # noqa no-changed-when
-      become: true
-      shell: "corepack enable"
-
-    # TODO: this only sets the symlinks to this directory - the actual packages are installed to ~/.config/yarn/global
-    - name: Set yarn to use directory  # noqa no-changed-when
-      shell: "yarn config set prefix {{ global_location }}"
+      shell: "{{ global_location }}/bin/n lts"
 
     - name: Install node packages
       npm:
         name: "{{ item }}"
         global: true
       loop:
+        - "@ansible/ansible-language-server"
         - eslint
         - neovim
+        - prettier
         - ts-node
         - typescript
         - typescript-language-server
+        - vscode-langservers-extracted

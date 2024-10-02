@@ -3,19 +3,27 @@
     - neovim
   vars:
     neovim_location: "{{ lookup('env', 'HOME') }}/opt/neovim"
+    luals_location: "{{ lookup('env', 'HOME') }}/opt/lua-language-server"
   block:
-    - name: Get packer
-      git:
-        repo: https://github.com/wbthomason/packer.nvim
-        dest: "{{ lookup('env', 'HOME') }}/.local/share/nvim/site/pack/packer/start/packer.nvim"
-        version: master
+    - name: Build prerequisites
+      become: true
+      apt:
+        name:
+          [
+            "ninja-build",
+            "gettext",
+            "cmake",
+            "unzip",
+            "curl",
+            "build-essential",
+          ]
 
     - name: Clone neovim
       git:
-        repo: https://github.com/neovim/neovim.git
+        repo: git@github.com:neovim/neovim
         dest: "{{ neovim_location }}"
         force: true
-        version: v0.7.2
+        version: stable
       register: gitclone
 
     - name: Build neovim
@@ -31,5 +39,27 @@
         cmd: "make install"
       when: gitclone.changed
 
-    - name: Bootstrap packer  # noqa no-changed-when
-      shell: "nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'"
+    - name: Clone lua-language-server
+      git:
+        repo: git@github.com:LuaLS/lua-language-server
+        dest: "{{ luals_location }}"
+        force: true
+      register: gitclone2
+
+    - name: Build lua-language-server
+      become: true
+      shell:
+        chdir: "{{ luals_location }}"
+        cmd: "./make.sh"
+      when: gitclone2.changed
+
+    - name: Create ~/bin
+      file:
+        path: "{{ lookup('env', 'HOME') }}/bin"
+        state: directory
+
+    - name: Symlink lua-language-server
+      file:
+        src: "{{ luals_location }}/bin/lua-language-server"
+        dest: "{{ lookup('env', 'HOME') }}/bin/lua-language-server"
+        state: link

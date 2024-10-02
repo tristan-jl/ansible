@@ -4,11 +4,11 @@
   block:
     - name: Install required system packages
       apt:
-        name: ['ca-certificates', 'curl']
+        name: ["ca-certificates", "curl"]
 
     - name: Install python system packages
       apt:
-        name: ['python3-dev', 'python3-distutils']
+        name: ["python3-dev"]
 
     - name: Add deadsnakes repository
       apt_repository:
@@ -18,22 +18,41 @@
 
     - name: Install python versions
       apt:
-        name: ['python3.8-dev', 'python3.8-distutils', 'python3.9-dev', 'python3.9-distutils', 'python3.11-dev', 'python3.11-distutils']
+        name:
+          [
+            "python3.10-dev",
+            "python3.10-distutils",
+            "python3.11-dev",
+            "python3.11-distutils",
+            "python3.11-dev",
+            "python3.11-distutils",
+            "python3.12-venv",
+          ]
 
 - name: Setup virtualenv for global dependencies
   tags: python
   vars:
     zip_app_location: /tmp/virtualenv.pyz
     venv_location: "{{ lookup('env', 'HOME') }}/opt/venv"
-    python_packages: ['black', 'pre-commit', 'jedi-language-server', 'tox', 'twine', 'virtualenv']
+    python_packages:
+      [
+        "ansible",
+        "black",
+        "pre-commit",
+        "pyright",
+        "reorder-python-imports",
+        "tox",
+        "twine",
+        "virtualenv",
+      ]
   block:
-    - name: Curl virtualenv zipapp  # noqa risky-file-permissions
+    - name: Curl virtualenv zipapp # noqa risky-file-permissions
       get_url:
         url: https://bootstrap.pypa.io/virtualenv.pyz
         dest: "{{ zip_app_location }}"
 
-    - name: Create virtualenv  # noqa no-changed-when
-      shell: python3.9 {{ zip_app_location }} {{ venv_location }}
+    - name: Create virtualenv # noqa no-changed-when
+      shell: python3 {{ zip_app_location }} {{ venv_location }}
 
     - name: Install python packages
       pip:
@@ -45,6 +64,11 @@
       pip:
         name: pynvim
         virtualenv: "{{ lookup('env', 'HOME') }}/opt/venv"
+
+    - name: Create ~/bin
+      file:
+        path: "{{ lookup('env', 'HOME') }}/bin"
+        state: directory
 
     - name: Symlink python packages
       file:

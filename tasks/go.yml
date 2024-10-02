@@ -2,6 +2,7 @@
   tags: go
   vars:
     go_location: /usr/local
+    go_version: "1.23.2"
   block:
     - name: Remove old go install
       become: true
@@ -12,9 +13,12 @@
     - name: Unzip to go location
       become: true
       unarchive:
-        src: https://go.dev/dl/go1.19.linux-amd64.tar.gz
+        src: https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz
         dest: "{{ go_location }}"
         remote_src: true
 
     - name: Install gopls
-      shell: "GOBIN=${HOME}/bin go install golang.org/x/tools/gopls@latest"
+      shell: "{{ go_location }}/go/bin/go install golang.org/x/tools/gopls@latest"
+
+    - name: Install goimports
+      shell: "{{ go_location }}/go/bin/go install golang.org/x/tools/cmd/goimports@latest"

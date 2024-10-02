@@ -15,15 +15,19 @@
 
     - name: Clone rust analyser
       git:
-        repo: https://github.com/rust-analyzer/rust-analyzer.git
+        repo: git@github.com:rust-analyzer/rust-analyzer
         dest: "{{ rust_analyser_location }}"
         force: true
       register: gitclone
 
     - name: Install rust analyser
       shell:
-        chdir: "{{ rust_analyser_location }}"
-        cmd: cargo xtask install --server
+        cmd: "{{ lookup('env', 'HOME') }}/.cargo/bin/cargo xtask install --server"
+      when: gitclone.changed
+
+    - name: Install rust packages
+      shell:
+        cmd: "{{ lookup('env', 'HOME') }}/.cargo/bin/cargo install stylua"
 
 - name: Install alacritty
   tags:
@@ -35,17 +39,26 @@
     - name: Install required libraries
       become: true
       apt:
-        name: ['cmake', 'pkg-config', 'libfreetype6-dev', 'libfontconfig1-dev', 'libxcb-xfixes0-dev', 'libxkbcommon-dev', 'python3']
+        name:
+          [
+            "cmake",
+            "pkg-config",
+            "libfreetype6-dev",
+            "libfontconfig1-dev",
+            "libxcb-xfixes0-dev",
+            "libxkbcommon-dev",
+            "python3",
+          ]
 
     - name: Clone alacritty
       git:
-        repo: https://github.com/alacritty/alacritty.git
+        repo: git@github.com:alacritty/alacritty
         dest: "{{ alacritty_location }}"
       register: gitclone
 
     - name: Install alacritty
       shell:
-        cmd: cargo build --release
+        cmd: "{{ lookup('env', 'HOME') }}/.cargo/bin/cargo build --release"
         chdir: "{{ alacritty_location }}"
       when: gitclone.changed
 
@@ -81,6 +94,7 @@
       shell:
         cmd: |
           mkdir -p /usr/local/share/man/man1
+          mkdir -p /usr/local/share/man/man5
           gzip -c extra/alacritty.man | sudo tee /usr/local/share/man/man1/alacritty.1.gz > /dev/null
           gzip -c extra/alacritty-msg.man | sudo tee /usr/local/share/man/man1/alacritty-msg.1.gz > /dev/null
         chdir: "{{ alacritty_location }}"
